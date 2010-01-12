@@ -14,6 +14,22 @@
 
 
 /*------------------------------------------------------------------------
+ *
+ * rfidLocMapInit  --  Initialization codel (fIDS, ...)
+ *
+ * Description: 
+ * 
+ * Returns:    OK or ERROR
+ */
+
+STATUS
+rfidLocMapInit(int *report)
+{
+  /* ... add your code here ... */
+  return OK;
+}
+
+/*------------------------------------------------------------------------
  * ActualizePositions
  *
  * Description: 

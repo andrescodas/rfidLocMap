@@ -129,5 +129,6 @@ exec_task MainTask {
     delay:		    0;
     priority:		    100;
     stack_size:		    60000;
+    c_init_func:	    rfidLocMapInit;
 };
 
