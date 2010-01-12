@@ -1,0 +1,133 @@
+/*------------------------------------------------------------
+ * 
+ *                     --  Module  RFIDLOCMAP  --
+ * 
+ *  Description: Robot localization and Mapping of new Rfid Tags
+ *  Creation date : Tue Jan 12 09:41:07 2010 
+ *  Author: Andres Codas
+ * 
+ *------------------------------------------------------------*/
+
+module rfidLocMap {
+    number:		    9002;
+    version:		    "0.1";
+    email:		    "codas@laas.fr";
+    requires:		    rfid,rflex;
+    codels_requires:        rfid,rflex;
+    internal_data:	    RFIDLOCMAP_STR;
+    lang:		    "c++";
+}; 
+
+/*------------------------------------------------------------
+ *	                   Structures and SDI
+ *------------------------------------------------------------*/
+
+#include "rfidLocMapStruct.h"
+
+import from rfid {
+#include "rfidStruct.h"
+#include "server/rfidPosterLibStruct.h"
+};
+
+import from rflex {
+#include "rflexStruct.h"
+#include "rflexConst.h"
+#include "server/rflexPosterLibStruct.h"
+};
+
+
+typedef struct RFIDLOCMAP_STR {
+         POSITION               position;
+         POSITION_ERROR         estimationError;
+         TAG_POSITION_LIST tagsPosition;
+         int			numberParticles;
+} RFIDLOCMAP_STR;
+
+/*------------------------------------------------------------
+ *	                       Requests
+ *------------------------------------------------------------*/
+
+
+/*  */
+request ActualizePositions {
+    doc:		    "Actualize the robot and tags positions with new measurements";
+    type:		    exec;
+    exec_task:		    MainTask;  
+    codel_start:	    rfidLocMapActualizePositionsStart;
+    codel_inter:	    rfidLocMapActualizePositionsInter;
+    fail_reports:           RFID_POSTER_NOT_FOUND, RFLEX_POSTER_NOT_FOUND;
+    interrupt_activity:	    all ; 
+};
+
+
+/*  */
+request StartRobotParticles {
+    doc:		    "Initialize Robot Particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    input:		    newPosition::position; 
+    codel_start:	    rfidLocMapStartRobotParticlesStart;
+    codel_inter:	    rfidLocMapStartRobotParticlesInter;
+    interrupt_activity:	    all; 
+};
+
+
+/*  */
+request SetNumberRobotParticles {
+    doc:		    "Define number of robot particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    input:		    newNumberParticles::numberParticles; 
+    codel_start:	    rfidLocMapSetNumberRobotParticlesStart;
+    codel_inter:	    rfidLocMapSetNumberRobotParticlesInter; 
+    interrupt_activity:	    all; 
+};
+
+
+/*  */
+request GetNumberRobotParticles {
+    doc:		    "Get number of robot particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    output:		    outNumberParticles::numberParticles;
+    codel_start:	    rfidLocMapGetNumberRobotParticlesStart;
+    codel_inter:	    rfidLocMapGetNumberRobotParticlesInter; 
+    interrupt_activity:	    all; 
+};
+
+
+
+
+/*------------------------------------------------------------
+ *	                        Posters
+ *------------------------------------------------------------*/
+
+poster RobotPosition {
+        update:                 auto;
+        data:                   RobotPosition::position,
+	                        covariance::estimationError;
+	exec_task:		MainTask;
+};
+
+
+/*  */
+poster TagsPosition {
+    update:		    auto;
+    data:		    TagsPosition::tagsPosition;
+    exec_task:		    MainTask; 
+};
+
+
+/*------------------------------------------------------------
+ *	                   Execution Tasks
+ *------------------------------------------------------------*/
+
+
+/*  */
+exec_task MainTask {
+    period:		    5;
+    delay:		    0;
+    priority:		    100;
+    stack_size:		    60000;
+};
+
