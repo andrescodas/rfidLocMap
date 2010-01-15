@@ -18,8 +18,18 @@ all: codels-mk-all
 # --- source files ------------------------------------------------------
 
 codels_src = \
+    geometricalTools.cc \
+	input.cc \
+	Particle.cc \
+	rfidLocMapCntrlTaskCodels.cc \
 	rfidLocMapMainTaskCodels.cc \
-	rfidLocMapCntrlTaskCodels.cc
+    RFIDSensorModel.cc \
+	RobotParticle.cc \
+	RobotParticles.cc \
+	Tag.cc \
+	tagDetection.cc 
+
+
 
 # Add extra flags for the preprocessor (external libraries, ...)
 # EXTRA_INCLUDES +=
