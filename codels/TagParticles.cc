@@ -8,26 +8,59 @@
 #include "TagParticles.h"
 
 TagParticles::TagParticles() {
-	void TagParticles::clearWeights()
-{
+
 }
 
-void TagParticles::accumulateWeights()
-{
+void TagParticles::clearWeights() {
+
+	set<Particle*, CompParticle>::iterator particlesIt;
+
+	particlesIt = this->particles.begin();
+	while (particlesIt != this->particles.end()) {
+		(*particlesIt)->weight = 0;
+	}
 }
 
-void TagParticles::normalize()
-{
+void TagParticles::accumulateWeights() {
+
+	set<Particle*, CompParticle>::iterator particlesIt;
+	double sum = 0;
+
+	particlesIt = this->particles.begin();
+	while (particlesIt != this->particles.end()) {
+		sum = sum + (*particlesIt)->weight;
+		(*particlesIt)->weight = sum;
+	}
+
+	if (fabs(sum-1) > 0.0000000001 ){
+		printf("Problems with sum of particles weight W = %lf",sum);
+	}
+
+
 }
 
-void TagParticles::resample()
-{
+void TagParticles::normalize() {
+
+	set<Particle*, CompParticle>::iterator particlesIt;
+	double sum = 0;
+
+	particlesIt = this->particles.begin();
+	while (particlesIt != this->particles.end()) {
+		sum = sum + (*particlesIt)->weight;
+	}
+
+	particlesIt = this->particles.begin();
+	while (particlesIt != this->particles.end()) {
+		(*particlesIt)->weight = (*particlesIt)->weight/sum;
+	}
+
 }
 
-// TODO Auto-generated constructor stub
+void TagParticles::resample() {
+
 
 }
 
 TagParticles::~TagParticles() {
-	// TODO Auto-generated destructor stub
+// TODO Auto-generated destructor stub
 }

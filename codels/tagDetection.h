@@ -17,7 +17,6 @@ class TagDetection {
 public:
 	int antenna;
 	char tagid[TAG_ID_MAX_SIZE + 1];
-	int balance;
 	TagDetection(int antenna, char* tagid);
 	TagDetection();
 	virtual ~TagDetection();

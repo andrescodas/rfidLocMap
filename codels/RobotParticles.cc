@@ -151,6 +151,16 @@ void RobotParticles::clearWeights() {
 	}
 }
 
+void RobotParticles::copy(RobotParticles* newRobotParticles){
+	newRobotParticles->estimatedPosition = this->estimatedPosition;
+	newRobotParticles->numberParticles = this->numberParticles;
+
+	for(int j = 0; j < this->numberParticles; j++){
+		newRobotParticles->particles[j] = this->particles[j];
+	}
+
+}
+
 RobotParticles::~RobotParticles() {
 
 }

@@ -20,10 +20,12 @@ all: codels-mk-all
 codels_src = \
     geometricalTools.cc \
 	input.cc \
+	MonteCarloMath.cc \
 	Particle.cc \
 	rfidLocMapCntrlTaskCodels.cc \
 	rfidLocMapMainTaskCodels.cc \
     RFIDSensorModel.cc \
+	RobotMonteCarlo.cc \
 	RobotParticle.cc \
 	RobotParticles.cc \
 	Tag.cc \

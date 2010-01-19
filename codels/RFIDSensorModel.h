@@ -20,8 +20,14 @@ double const ANTENNA_POSITION_RADIUS = 0.35;
 double const ANTENNA_POSITION_ANGLES[] = { 4* PI / 4, 3* PI / 4, 2* PI / 4, 1*
 		PI / 4, 0* PI / 4, 7* PI / 4, 6* PI / 4, 5* PI / 4 };
 
-
+void reduceToRobotSensorSystem(double robot_position_x,
+		double robot_position_y, double robot_position_theta,
+		double tag_position_x, double tag_position_y, int antenna_number,
+		double* distance, double* angle);
+double probabilityModel(double distance, double angle) ;
+void getProbablePosition(double *distance,double *angleRadians);
 const char SENSOR_BASE_MODEL[] = "/simulation/sensor_base_model_P.in";
+const char POSITION_LIKELIHOOD_MODEL[] = "/simulation/sensor_base_model_L.in";
 
 void initSensorModel();
 

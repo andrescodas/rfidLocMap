@@ -14,12 +14,13 @@
 #include "input.h"
 #include "RobotParticles.h"
 #include "Tag.h"
+#include "RobotMonteCarlo.h"
 #include "server/rfidLocMapHeader.h"
 
 
 RobotParticles robotParticles(200);
 double old_odo[3]; // x y t
-TagMap tagmap;
+TagMap tagMap;
 
 /*------------------------------------------------------------------------
  *
@@ -31,7 +32,7 @@ TagMap tagmap;
  */
 
 STATUS rfidLocMapInit(int *report) {
-	//tagmap = initTagMap();
+	tagMap = initTagMap();
 
 	RobotParticle robotParticle(0,0,0,0);
 	robotParticles = RobotParticles(robotParticle,200);
@@ -82,8 +83,7 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 	}
 
 
-	//locateRobot(&tagDetectionSet,odo_position,old_odo,odo_cov);
-
+	locateRobot(&tagDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,0.99);
 
 	/*
 

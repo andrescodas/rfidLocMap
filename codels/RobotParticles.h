@@ -18,11 +18,6 @@ const int MAX_ROBOT_PARTICLES = 1000;
 class RobotParticles : public Particles {
 private:
 	void clearWeights();
-	void accumulateWeights();
-	RobotParticle estimatePosition();
-	void normalize();
-	void resample();
-	int searchParticle(double probability);
 	double getRandomUniformDouble();
 
 public:
@@ -33,6 +28,12 @@ public:
 	RobotParticles(int _numberParticles);
 	RobotParticles(RobotParticle _initialPosition,int _numberParticles);
 	virtual ~RobotParticles();
+	void accumulateWeights();
+	void normalize();
+	void resample();
+	int searchParticle(double probability);
+	RobotParticle estimatePosition();
+	void copy(RobotParticles* newRobotParticles);
 };
 
 #endif /* ROBOTPARTICLES_H_ */
