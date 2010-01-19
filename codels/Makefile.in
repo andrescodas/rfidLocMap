@@ -22,6 +22,7 @@ codels_src = \
 	input.cc \
 	MonteCarloMath.cc \
 	Particle.cc \
+	Point2D.cc \
 	rfidLocMapCntrlTaskCodels.cc \
 	rfidLocMapMainTaskCodels.cc \
     RFIDSensorModel.cc \
@@ -29,8 +30,9 @@ codels_src = \
 	RobotParticle.cc \
 	RobotParticles.cc \
 	Tag.cc \
-	tagDetection.cc 
-
+	tagDetection.cc \
+	TagMonteCarlo.cc \
+	TagParticles.cc 
 
 
 # Add extra flags for the preprocessor (external libraries, ...)

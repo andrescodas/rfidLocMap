@@ -86,7 +86,7 @@ RobotParticles::RobotParticles(RobotParticle _initialPosition,
 
 }
 
-void RobotParticles::normalize() {
+double RobotParticles::normalize() {
 	int j;
 	double sum = 0;
 
@@ -102,6 +102,7 @@ void RobotParticles::normalize() {
 		this->particles[j].weight = this->particles[j].weight / sum;
 	}
 
+	return sum;
 }
 
 RobotParticle RobotParticles::estimatePosition() {

@@ -29,7 +29,7 @@ public:
 	RobotParticles(RobotParticle _initialPosition,int _numberParticles);
 	virtual ~RobotParticles();
 	void accumulateWeights();
-	void normalize();
+	double normalize();
 	void resample();
 	int searchParticle(double probability);
 	RobotParticle estimatePosition();

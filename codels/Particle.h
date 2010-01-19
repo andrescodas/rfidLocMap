@@ -20,11 +20,11 @@ public:
 
 class CompParticle {
 public:
-	bool operator()(Particle* p1, Particle* p2) {
-		if (p1->x != p2->x) {
-			return (p1->x < p2->x);
+	bool operator()(Particle p1, Particle p2) {
+		if (p1.x != p2.x) {
+			return (p1.x < p2.x);
 		} else {
-			return (p1->y < p2->y);
+			return (p1.y < p2.y);
 		}
 	}
 };

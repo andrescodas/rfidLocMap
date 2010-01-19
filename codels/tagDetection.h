@@ -11,6 +11,7 @@
 #include "string.h"
 #include "Tag.h"
 #include <set>
+#include "TagParticles.h"
 
 class TagDetection {
 
@@ -34,6 +35,11 @@ struct TagDetectionCompare {
 
 typedef std::set< TagDetection*, TagDetectionCompare > TagDetectionSet;
 
+void sortDetectionsByTagMap(TagDetectionSet* inside,TagDetectionSet* outside, TagDetectionSet* tagDetectionSet, TagMap *tagMap);
+
+void sortDetectionsByTagParticlesMap(TagDetectionSet* inside,TagDetectionSet* outside, TagDetectionSet* tagDetectionSet, TagParticlesMap *tagParticlesMap);
+
+void sortDetectionsByTagid(TagDetectionSet* inside, TagDetectionSet* tagDetectionSet, const char* tagid);
 
 void deleteTagDetections(TagDetectionSet* tagDetection);
 

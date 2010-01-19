@@ -128,16 +128,16 @@ int initInput() {
 		printf("Path returned NULL");
 	}
 
-	strcpy(location,pHome);
-	strcat(location,"/simulation/rflexPositionSet.txt");
+	strcpy(location, pHome);
+	strcat(location, "/simulation/rflexPositionSet.txt");
 	odoFile = fopen(location, "r");
 
-	strcpy(location,pHome);
-	strcat(location,"/simulation/rflexCovarianceSet.txt");
+	strcpy(location, pHome);
+	strcat(location, "/simulation/rflexCovarianceSet.txt");
 	covFile = fopen(location, "r");
 
-	strcpy(location,pHome);
-	strcat(location,"/simulation/detectionsBogdanTest.txt");
+	strcpy(location, pHome);
+	strcat(location, "/simulation/detectionsBogdanTest.txt");
 	rfidFile = fopen(location, "r");
 
 	if (covFile == NULL) {
@@ -253,11 +253,12 @@ int readRFID(TagDetectionSet* tagDetections) {
 
 	if (status != 3) {
 
-		if(status == EOF){
+		if (status == EOF) {
 			printf("End of file Reached on RFID\n");
 			return 1;
 		}
-		printf("Problem Reading RFID File! PositionsInit, number read = %d\n",status);
+		printf("Problem Reading RFID File! PositionsInit, number read = %d\n",
+				status);
 		printf("Given Positions = %lf %lf %lf\n", posx, posy, post);
 		return 1;
 	}
@@ -286,7 +287,7 @@ int readRFID(TagDetectionSet* tagDetections) {
 			}
 			if (detection == 1) {
 
-				tagDetections->insert(new TagDetection(j,tagid));
+				tagDetections->insert(new TagDetection(j, tagid));
 
 			}
 		}
@@ -305,12 +306,13 @@ int readRFID(TagDetectionSet* tagDetections) {
 		status = fscanf(rfidFile, "%lf %lf %lf", &posx, &posy, &post);
 		if (status != 3) {
 
-			if(status == EOF){
+			if (status == EOF) {
 				printf("End of file Reached on RFID\n");
-				return 0 ;
+				return 0;
 			}
 
-			printf("Problem Reading RFID File! LastRead!, number read = %d\n",status);
+			printf("Problem Reading RFID File! LastRead!, number read = %d\n",
+					status);
 			printf("Given Positions = %lf %lf %lf\n", posx, posy, post);
 			return 1;
 		}
@@ -324,6 +326,5 @@ int readRFID(TagDetectionSet* tagDetections) {
 	}
 	return 0;
 }
-
 
 #endif

@@ -10,6 +10,7 @@
 
 #include <map>
 #include <string.h>
+#include "Point2D.h"
 
 const int TAG_ID_MAX_SIZE = 16;
 
@@ -24,22 +25,6 @@ public:
 	virtual ~Tag();
 };
 
-//a structure describing a point (x,y) in 2D
-typedef struct Point2D {
-	double x;
-	double y;
-
-	Point2D(double _x, double _y) {
-		x = _x;
-		y = _y;
-	}
-
-	Point2D() {
-		x = 0;
-		y = 0;
-	}
-
-} Point2D;
 
 struct strCmp {
 	bool operator()(const char* s1, const char* s2) const {

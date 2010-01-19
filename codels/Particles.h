@@ -14,7 +14,7 @@ class Particles {
 public:
 	virtual void clearWeights() = 0;
 	virtual void accumulateWeights() = 0;
-	virtual void normalize() = 0;
+	virtual double normalize() = 0;
 	virtual void resample() = 0;
 };
 

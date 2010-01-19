@@ -9,24 +9,35 @@
 #define TAGPARTICLES_H_
 
 #include "Particles.h"
-#include <set>
+#include "Tag.h"
+#include <map>
 
 const int MAX_TAG_PARTICLES = 500;
 
+
 class TagParticles: public Particles {
-private:
+public:
+	std::map<Point2D, double,Point2DCmp> particles;
+	virtual ~TagParticles();
 	int numberParticles;
-	set <Particle*, CompParticle> particles;
 	void clearWeights();
 	void accumulateWeights();
-	void normalize();
+	double normalize();
+	void insert(Point2D p, double weight);
 	void resample();
-public:
-	TagParticles(int numberParticles);
+	void scale(double factor);
+	void sumTagsWeight(TagParticles *tagParticles);
+	void copy(TagParticles* tagParticles);
+	TagParticles();
+	TagParticles(int _numberParticles);
 	TagParticles(int _numberParticles, Particle _initialPosition);
-	virtual ~TagParticles();
+
 
 
 };
+
+//a map that allows us to recover a tag (position) by id
+typedef std::map<const char*, TagParticles*, strCmp> TagParticlesMap;
+
 
 #endif /* TAGPARTICLES_H_ */
