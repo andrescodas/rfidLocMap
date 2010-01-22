@@ -15,10 +15,15 @@
 #include "Tag.h"
 #include "RobotMonteCarlo.h"
 #include "TagMonteCarlo.h"
-#include "server/rfidLocMapHeader.h"
+#include "../server/rfidLocMapHeader.h"
 
 
-RobotParticles robotParticles(200);
+const int numberParticlesRobot = 200;
+const int numberParticlesTag = 100;
+const double inertiaTag = 0.98;
+const double inertiaRobot = 0.95;
+
+RobotParticles robotParticles(numberParticlesRobot);
 double old_odo[3]; // x y t
 TagMap tagMap;
 TagParticlesMap inferringTags;
@@ -36,7 +41,7 @@ STATUS rfidLocMapInit(int *report) {
 	tagMap = initTagMap();
 
 	RobotParticle robotParticle(0,0,0,0);
-	robotParticles = RobotParticles(robotParticle,200);
+	robotParticles = RobotParticles(robotParticle,numberParticlesRobot);
 
 	if (initInput() != 0) {
 		printf("Problems in input initialization\n");
@@ -54,7 +59,6 @@ STATUS rfidLocMapInit(int *report) {
 	initSensorModel();
 
 	return OK;
-
 }
 
 /*------------------------------------------------------------------------
@@ -71,17 +75,19 @@ STATUS rfidLocMapInit(int *report) {
  Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 
+	double quality;
+	double odo_position[3];
+	double odo_cov[3][3];
+
 	TagDetectionSet tagDetectionSet;
 	TagDetectionSet fixedTagsDetectionSet;
 	TagDetectionSet inferringTagsDetectionSet;
 	TagDetectionSet knownInferringTagsDetection;
 	TagDetectionSet newInferringTagsDetection;
 	TagDetectionSet tagDetectionIt;
+	TagDetectionSet::iterator detectionIt;
 
-	double quality;
-
-	double odo_position[3];
-	double odo_cov[3][3];
+	TagParticles *newDetectedTag;
 
 	if (readRflex(odo_position, odo_cov) != 0) {
 		return ETHER;
@@ -92,7 +98,7 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 
 	sortDetectionsByTagMap(&fixedTagsDetectionSet,&inferringTagsDetectionSet,&tagDetectionSet,&tagMap);
 
-	locateRobot(&fixedTagsDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,0.99);
+	locateRobot(&fixedTagsDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,inertiaRobot);
 
 	sortDetectionsByTagParticlesMap(&knownInferringTagsDetection,&newInferringTagsDetection,&inferringTagsDetectionSet,&inferringTags);
 
@@ -106,48 +112,25 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 			printf("WeightNormalizeTags with quality > 1\n");
 		}
 
+		resampleExploreTags((iTagIt->second),&tagDetectionIt,inertiaTag+(1-inertiaTag)*quality,&robotParticles,numberParticlesTag,true);
 
 	}
 
-	/*
-    for it = 1:length(inferingTags)
+	detectionIt = newInferringTagsDetection.begin();
+	while(detectionIt != newInferringTagsDetection.end()){
 
-        tagItDetections = sortDetectionsByTag(knownInferingTagsDetection,inferingTags(it));
-        %         tic
-        [weightedTags,quality] = weightNormalizeTags(   polarModel,...
-            tagItDetections,...
-            inferingTags(it),...
-            robotByParticules,...
-            antennas);
+		tagDetectionIt.clear();
+		sortDetectionsByTagid(&tagDetectionIt,&newInferringTagsDetection, (*detectionIt)->tagid);
 
-        %         display('---------------------')
-        %         display('Weight Normalize Tags')
-        %         toc
-        %         display('---------------------')
+		newDetectedTag = new TagParticles();
 
+		resampleExploreTags(newDetectedTag,&tagDetectionIt,0,&robotParticles,numberParticlesTag,false);
 
-        if(quality>1)
-            warning('quality > 1')
-            warn = input('quality with strange value')
-        else
-            display(strcat('quality = ',num2str(quality)))
-        end
-        inferingTags(it).particuleSet = resampleExplore(weightedTags.particuleSet,polarModel,tagItDetections,robotRadius,inertiaTag+(1-inertiaTag)*quality,robotByParticules.particuleSet,numberParticulesTag);
-    end
-
-    for nit =  1:length(newInferingTagsDetection)
-        if(searchTag(inferingTags,newInferingTagsDetection(nit).tagId) == 0)
-            newTagDetections = sortDetectionsByTagId(newInferingTagsDetection,newInferingTagsDetection(nit).tagId);
-            particuleSet = resampleExplore([],polarModel,newTagDetections,robotRadius,0,robotByParticules.particuleSet,numberParticulesTag);
-            inferingTags = [inferingTags struct('tagId',newInferingTagsDetection(nit).tagId,'particuleSet',particuleSet,'position',[-inf -inf])];
-
-        end
-    end
-
-    for tagIndex = 1:length(inferingTags);
-        inferingTags(tagIndex).position = estimateTagPosition(inferingTags(tagIndex).particuleSet);
-    end
-*/
+		for(detectionIt = tagDetectionIt.begin();detectionIt != tagDetectionIt.end();detectionIt++){
+			newInferringTagsDetection.erase((*detectionIt));
+		}
+		detectionIt = newInferringTagsDetection.begin();
+	}
 
 
 	old_odo[0] = odo_position[0];

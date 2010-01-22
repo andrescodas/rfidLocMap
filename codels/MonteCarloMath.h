@@ -12,7 +12,6 @@ double mc_getRandomUniformDouble() ;
 int randInteger(int max);
 double mc_getRandomUniformDouble(double min, double max) ;
 double mc_getGaussDouble(double m, double e);
-//void mc_generateGaussianRandomPoint(mc_Point center,double covariance[3][3],mc_Point *newPoint);
 void mc_generateGaussianRandomPoint(double distributionPoint[3],const double covariance[3][3]);
 void mc_getCholeskyDecomposition(const double A[3][3], double L[3][3]) ;
 void mc_multiplyMatrices(const double A[3][3],const  double B[3][3], double P[3][3]);

@@ -39,9 +39,7 @@ void movementPrediction(double odo_Position[3], double old_odo[3],
 
 }
 
-double getSimilarityProbability(const TagDetectionSet* tagDetectionSet,
-		const RobotParticle* robotParticle,TagMap* tagMap,
-		double *quality) {
+double getSimilarityProbability(const TagDetectionSet* tagDetectionSet,const RobotParticle* robotParticle,TagMap* tagMap,double *quality) {
 
 	TagDetection tagDetection;
 	TagMap::iterator tagIt;
@@ -84,8 +82,7 @@ double getSimilarityProbability(const TagDetectionSet* tagDetectionSet,
 		}
 		tagIt++;
 	}
-
-	*quality = q / double(NUMBER_OF_ANTENNAS) / double(tagDetectionSet->size());
+	*quality = q / double(NUMBER_OF_ANTENNAS) / double(tagMap->size());
 	return p;
 }
 
@@ -131,7 +128,7 @@ void initRobotPosition(RobotParticle *robotParticle,std::pair<const char* const,
 void newRobotParticules(RobotParticles* exploringParticles,TagMap* tagMap,TagDetectionSet* tagDetectionSet){
 
 	int numberDetected = 0;
-	int numberParticlesRobot = exploringParticles->numberParticles;
+	int numberParticlesRobot;
 	int particleIt;
 	TagDetectionSet::iterator tagDetectionIt;
 	TagMap::iterator tagIt;
@@ -149,7 +146,7 @@ void newRobotParticules(RobotParticles* exploringParticles,TagMap* tagMap,TagDet
 	}
 
 	if(numberDetected > 0){
-		numberParticlesRobot = ceil(double(double(numberParticlesRobot)/double(numberDetected)));
+		numberParticlesRobot = ceil(double(double(exploringParticles->numberParticles)/double(numberDetected)));
 	}else{
 		exploringParticles->numberParticles = 0;
 		return;
@@ -188,7 +185,7 @@ void resampleExploreRobot(RobotParticles *robotParticles, double inertia,TagMap*
 	RobotParticles oldRobotParticles(robotParticles->numberParticles);
 	RobotParticles exploringParticles(robotParticles->numberParticles);
 
-	double particleWeight = 1 / double(robotParticles->numberParticles);
+	double particleWeight = double(1.0) / double(robotParticles->numberParticles);
 
 	bool makeExploration = false;
 	bool exploringParticlesInited = false;
@@ -206,6 +203,7 @@ void resampleExploreRobot(RobotParticles *robotParticles, double inertia,TagMap*
 			makeExploration = true;
 			break;
 		}
+		tagDetectionIt ++;
 	}
 
 	if (makeExploration && makeResample) {
@@ -247,20 +245,20 @@ void correctionResampling(RobotParticles *robotParticles, TagMap* tagMap,
 	robotParticles->normalize();
 
 	if (quality == 1) {
+
 	} else if (quality > 1) {
 		printf("There is a bug.  Quality > 1");
 	} else {
+
 		resampleExploreRobot(robotParticles, inertia + (1 - inertia) * quality,tagMap, tagDetectionSet, true);
+
 		robotParticles->estimatePosition();
 	}
 }
 
-void locateRobot(TagDetectionSet* tagDetectionSet, double odo_position[3],
-		double old_odo[3], double odo_cov[3][3], TagMap* tagMap,
-		RobotParticles *robotParticles, double inertia) {
+void locateRobot(TagDetectionSet* tagDetectionSet, double odo_position[3],double old_odo[3], double odo_cov[3][3], TagMap* tagMap,RobotParticles *robotParticles, double inertia) {
 
 	movementPrediction(odo_position, old_odo, odo_cov, robotParticles);
-
 	correctionResampling(robotParticles,tagMap,tagDetectionSet,inertia);
 
 }

@@ -18,6 +18,19 @@ TagParticles::~TagParticles() {
 TagParticles::TagParticles() {
 }
 
+std::map<Point2D,double,Point2DCmp>::iterator TagParticles::searchParticle(double probability){
+
+	std::map<Point2D,double,Point2DCmp>::iterator particleIt;
+
+	particleIt = this->particles.begin();
+
+	while(particleIt->second < probability){
+		particleIt ++;
+	}
+	return particleIt;
+
+}
+
 TagParticles::TagParticles(int _numberParticles) {
 	this->numberParticles = _numberParticles;
 }
@@ -55,6 +68,7 @@ double TagParticles::normalize() {
 	std::map<Point2D, double>::iterator particlesIt;
 	double sum = 0;
 	double weight;
+
 	particlesIt = this->particles.begin();
 	while (particlesIt != this->particles.end()) {
 		sum = sum + particlesIt->second;
@@ -84,7 +98,7 @@ double TagParticles::normalize() {
 }
 
 void TagParticles::resample() {
-
+	printf("TagParticles::resample():: Warning: This function is not being implemented \n");
 
 }
 
@@ -92,8 +106,8 @@ void TagParticles::sumTagsWeight(TagParticles *tagParticles){
 
 	std::map<Point2D, double>::iterator particlesIt;
 	std::map<Point2D, double>::iterator particlesIt2;
-	particlesIt2 = tagParticles->particles.begin();
 
+	particlesIt2 = tagParticles->particles.begin();
 	for (particlesIt = this->particles.begin(); particlesIt
 			!= this->particles.end(); particlesIt++) {
 

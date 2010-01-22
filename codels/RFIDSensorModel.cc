@@ -148,10 +148,10 @@ void getProbablePosition(double *distance,double *angleRadians){
 	if (aleatoryNumber < distanceLikelihoodModel[0]) {
 		distanceIndex = 0;
 	} else if (aleatoryNumber > distanceLikelihoodModel[distanceIndex]) {
-		printf("Bad top index");
+		printf("getProbablePosition: Bad top index\n");
 	} else {
 		while (distanceIndex - bottomIndex > 1) {
-			currentIndex = int(floor(double(distanceIndex + bottomIndex) / double(2)));
+			currentIndex = int(floor(double(distanceIndex + bottomIndex) / double(2.0)));
 
 			if (distanceLikelihoodModel[currentIndex]< aleatoryNumber) {
 				bottomIndex = currentIndex;
@@ -168,7 +168,7 @@ void getProbablePosition(double *distance,double *angleRadians){
 	if( aleatoryNumber < positionLikelihoodModel[distanceIndex * modelSize[1] + bottomIndex]){
 	    angleIndex = 0;
 	}else if( aleatoryNumber > positionLikelihoodModel[distanceIndex * modelSize[1] + angleIndex] ){
-		printf("Bad top index");
+		printf("getProbablePosition: Bad top index\n");
 	}else{
 	    while(angleIndex - bottomIndex > 1){
 
@@ -183,10 +183,11 @@ void getProbablePosition(double *distance,double *angleRadians){
 	}
 
 	*distance = (distanceIndex+mc_getRandomUniformDouble())*stepDistance;
-	*angleRadians = (angleIndex+mc_getRandomUniformDouble())*stepRadius;
 
 	if(mc_getRandomUniformDouble() > 0.5){
-		*angleRadians  = -*angleRadians ;
+		*angleRadians  = (angleIndex+mc_getRandomUniformDouble())*stepRadius;
+	}else{
+		*angleRadians  = -(angleIndex+mc_getRandomUniformDouble())*stepRadius;
 	}
 
 }

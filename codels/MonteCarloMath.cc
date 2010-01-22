@@ -47,24 +47,6 @@ double mc_getGaussDouble(double m, double e) {
 	return m + e * x;
 }
 
-/*
-//@tested
-//draws a random point in the gaussian distribution centered in center and given by the covariance
-void mc_generateGaussianRandomPoint(mc_Point center,
-	double covariance[3][3],mc_Point *newPoint) {
-	double gaussianVector[3] = { mc_getGaussDouble(0, 1), mc_getGaussDouble(0,
-			1), mc_getGaussDouble(0, 1) };
-	double L[3][3];
-	mc_getCholeskyDecomposition(covariance, L);
-	double vector[3];
-	mc_multiplyMatrices(L, gaussianVector, vector);
-
-	newPoint->x = center.x + vector[0];
-	newPoint->y = center.y + vector[1];
-	newPoint->theta = center.theta+ vector[2];
-}
-*/
-
 //@tested
 //draws a random point in the gaussian distribution centered in center and given by the covariance
 void mc_generateGaussianRandomPoint(double distributionPoint[3],const double covariance[3][3]) {

@@ -28,6 +28,7 @@ public:
 	void scale(double factor);
 	void sumTagsWeight(TagParticles *tagParticles);
 	void copy(TagParticles* tagParticles);
+	std::map<Point2D, double,Point2DCmp>::iterator searchParticle(double probability);
 	TagParticles();
 	TagParticles(int _numberParticles);
 	TagParticles(int _numberParticles, Particle _initialPosition);

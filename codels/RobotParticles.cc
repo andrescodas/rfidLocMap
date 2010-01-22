@@ -49,8 +49,8 @@ double RobotParticles::getRandomUniformDouble() {
 }
 
 void RobotParticles::resample() {
-	int pIndex;
-	double aleatoryNumber;
+
+
 	double weight = double(double(1) / double(this->numberParticles));
 	RobotParticles oldParticles(this->numberParticles);
 
@@ -60,16 +60,8 @@ void RobotParticles::resample() {
 
 	oldParticles.accumulateWeights();
 
-
 	for (int k = 0; k < this->numberParticles; k++) {
-		aleatoryNumber = getRandomUniformDouble();
-
-		pIndex = oldParticles.searchParticle(aleatoryNumber);
-
-		this->particles[k].x = oldParticles.particles[pIndex].x;
-		this->particles[k].y = oldParticles.particles[pIndex].y;
-		this->particles[k].theta = oldParticles.particles[pIndex].theta;
-		this->particles[k].weight = weight;
+		this->particles[k] = oldParticles.particles[oldParticles.searchParticle(getRandomUniformDouble())];
 	}
 
 }
@@ -89,19 +81,23 @@ RobotParticles::RobotParticles(RobotParticle _initialPosition,
 double RobotParticles::normalize() {
 	int j;
 	double sum = 0;
+	double weight;
 
 	for (j = 0; j < this->numberParticles; j++) {
 		sum = sum + this->particles[j].weight;
 	}
 
 	if (fabs(sum) < 0.00000000000001) {
-		printf("Probably producing NaN weights, sum(w) == %lf\n", sum);
+		printf("Robot Particles: sum(w) == %lf, reseting weights\n", sum);
+		weight = double(double(1) / double(this->numberParticles));
+		for (j = 0; j < this->numberParticles; j++) {
+			this->particles[j].weight = weight;
+		}
+	} else {
+		for (j = 0; j < this->numberParticles; j++) {
+			this->particles[j].weight = this->particles[j].weight / sum;
+		}
 	}
-
-	for (j = 0; j < this->numberParticles; j++) {
-		this->particles[j].weight = this->particles[j].weight / sum;
-	}
-
 	return sum;
 }
 
@@ -119,7 +115,7 @@ RobotParticle RobotParticles::estimatePosition() {
 		cosEstimated = cosEstimated + cos(this->particles[j].theta);
 	}
 
-	yEstimated = yEstimated / (double) numberParticles;
+
 	cosEstimated = cosEstimated / (double) numberParticles;
 	sinEstimated = sinEstimated / (double) numberParticles;
 

@@ -14,7 +14,12 @@
 #include "RobotParticles.h"
 #include "TagParticles.h"
 #include "tagDetection.h"
+
+
 double weightNormalizeTags(TagDetectionSet* tagDetectionSet,TagParticles* tagParticles,RobotParticles* robotParticles,const char* tagid);
+
+
+void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetections,double inertia,RobotParticles *robotParticles,int numberParticlesTag,bool makeResample);
 
 
 #endif /* TAGMONTECARLO_H_ */

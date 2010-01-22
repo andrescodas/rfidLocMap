@@ -13,9 +13,8 @@
 
 int initInput();
 
-
 int readRflex(double odo_position[3], double odo_cov[3][3]);
 
-int readRFID( TagDetectionSet* tagDetections);
+int readRFID(TagDetectionSet* tagDetections);
 
 #endif /* INPUT_H_ */
