@@ -22,7 +22,6 @@ private:
 
 public:
 
-	RobotParticle estimatedPosition;
 	RobotParticle particles[MAX_ROBOT_PARTICLES];
 	int numberParticles;
 	RobotParticles(int _numberParticles);
@@ -32,8 +31,10 @@ public:
 	double normalize();
 	void resample();
 	int searchParticle(double probability);
-	RobotParticle estimatePosition();
+	void estimatePosition(double *x,double *y, double *theta,double cov[6]);
 	void copy(RobotParticles* newRobotParticles);
+	int print(const char *fileName);
+	void show();
 };
 
 #endif /* ROBOTPARTICLES_H_ */

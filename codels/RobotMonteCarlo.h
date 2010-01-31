@@ -15,7 +15,7 @@
 
 void movementPrediction(double odo_position[3],double old_odo[3],double odo_cov[3][3],RobotParticles *robotParticles);
 
-void locateRobot(TagDetectionSet* tagDetectionSet,double odo_position[3],double old_odo[3],double odo_cov[3][3],TagMap *tagMap,RobotParticles *robotParticles,double inertia);
+void locateRobot(TagDetectionSet* tagDetectionSet,double odo_position[3],double old_odo[3],double odo_cov[3][3],TagMap *tagMap,RobotParticles *robotParticles,double inertia,int step);
 
 
 #endif /* ROBOTMONTECARLO_H_ */

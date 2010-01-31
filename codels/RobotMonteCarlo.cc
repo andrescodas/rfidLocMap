@@ -11,6 +11,8 @@
 #include "geometricalTools.h"
 
 
+
+
 void movementPrediction(double odo_Position[3], double old_odo[3],
 		double covariance[3][3], RobotParticles *robotParticles) {
 
@@ -56,7 +58,7 @@ double getSimilarityProbability(const TagDetectionSet* tagDetectionSet,const Rob
 
 	while (tagIt != tagMap->end()) {
 
-		strcpy(tagDetection.tagid, tagIt->first);
+		tagDetection.tagid =  tagIt->first;
 		for (int a = 0; a < NUMBER_OF_ANTENNAS; a++) {
 
 			reduceToRobotSensorSystem(robotParticle->x, robotParticle->y,
@@ -64,20 +66,24 @@ double getSimilarityProbability(const TagDetectionSet* tagDetectionSet,const Rob
 					&distance, &angle);
 			likelihoodAntennaTag = probabilityModel(distance, angle);
 
+			//TODO: ANTENNA 5 OUT OF ORDER
+			if(a == 5){
+				likelihoodAntennaTag = 0.01;
+			}
+
+
 			tagDetection.antenna = a;
 			tagDetectionIt = tagDetectionSet->find(&tagDetection);
 
-			if (tagDetectionIt != tagDetectionSet->end()) {
-				p = p * likelihoodAntennaTag;
-			} else {
-				p = p * (1 - likelihoodAntennaTag);
+			if (tagDetectionIt == tagDetectionSet->end()) {
+				likelihoodAntennaTag = (1 - likelihoodAntennaTag);
 			}
-
+				p = p * likelihoodAntennaTag;
 			if (p == 0) {
 				*quality = 0;
 				return 0;
 			} else {
-				q = q + p;
+				q = q + likelihoodAntennaTag;
 			}
 		}
 		tagIt++;
@@ -106,7 +112,7 @@ double weightRobotParticles(RobotParticles *robotParticles,TagDetectionSet* tagD
 }
 
 
-void initRobotPosition(RobotParticle *robotParticle,std::pair<const char* const, Point2D> *tag,int antenna){
+void initRobotPosition(RobotParticle *robotParticle,Point2D *tagPosition,int antenna){
 	double distance;
 	double angleRadians;
 	double anglePolar;
@@ -115,9 +121,9 @@ void initRobotPosition(RobotParticle *robotParticle,std::pair<const char* const,
 
     anglePolar = angleWrap((mc_getRandomUniformDouble()-0.5)*2*PI);
 
-    robotParticle->x = tag->second.x + distance*cos(anglePolar);
+    robotParticle->x = tagPosition->x + distance*cos(anglePolar);
 
-    robotParticle->y = tag->second.y + distance*sin(anglePolar);
+    robotParticle->y = tagPosition->y + distance*sin(anglePolar);
 
     robotParticle->theta = angleWrap(anglePolar + PI + angleRadians - ANTENNA_POSITION_ANGLES[antenna]);
 
@@ -132,9 +138,7 @@ void newRobotParticules(RobotParticles* exploringParticles,TagMap* tagMap,TagDet
 	int particleIt;
 	TagDetectionSet::iterator tagDetectionIt;
 	TagMap::iterator tagIt;
-
-	double weight = double(double(1.0)/double(exploringParticles->numberParticles));
-
+	double particleWeight = double(1.0)/double(exploringParticles->numberParticles);
 	tagDetectionIt = tagDetectionSet->begin();
 
 	while(tagDetectionIt != tagDetectionSet->end()){
@@ -160,8 +164,8 @@ void newRobotParticules(RobotParticles* exploringParticles,TagMap* tagMap,TagDet
 		if (tagIt != tagMap->end()) {
 			for(int i = 0; i < numberParticlesRobot; i++){
 				if (particleIt < exploringParticles->numberParticles){
-					initRobotPosition(&(exploringParticles->particles[particleIt]),&(*tagIt),(*tagDetectionIt)->antenna);
-					exploringParticles->particles[particleIt].weight = weight;
+					initRobotPosition(&(exploringParticles->particles[particleIt]),&(tagIt->second),(*tagDetectionIt)->antenna);
+					exploringParticles->particles[particleIt].weight = particleWeight;
 				}else{
 					break;
 				}
@@ -211,54 +215,81 @@ void resampleExploreRobot(RobotParticles *robotParticles, double inertia,TagMap*
 		for (int k = 0; k < robotParticles->numberParticles; k++) {
 			if (mc_getRandomUniformDouble() < inertia) {
 				robotParticles->particles[k] = oldRobotParticles.particles[oldRobotParticles.searchParticle(mc_getRandomUniformDouble())];
+				robotParticles->particles[k].weight = particleWeight;
 			} else {
 				if (!exploringParticlesInited) {
 					exploringParticlesInited = true;
 					newRobotParticules(&exploringParticles,tagMap,tagDetectionSet);
+
 				}
-				robotParticles->particles[k] = exploringParticles.particles[randInteger(exploringParticles.numberParticles-1)];
+				robotParticles->particles[k] = exploringParticles.particles[randInteger(exploringParticles.numberParticles)];
+				robotParticles->particles[k].weight = particleWeight;
 			}
 		}
 
 	} else if (makeResample) {
 		for (int k = 0; k < robotParticles->numberParticles; k++) {
 			robotParticles->particles[k]= oldRobotParticles.particles[oldRobotParticles.searchParticle(mc_getRandomUniformDouble())];
+			robotParticles->particles[k].weight = particleWeight;
 		}
 	}else{
 		newRobotParticules(&exploringParticles,tagMap,tagDetectionSet);
 		for (int k = 0; k < robotParticles->numberParticles; k++) {
-				robotParticles->particles[k] = exploringParticles.particles[randInteger(exploringParticles.numberParticles-1)];
+				robotParticles->particles[k] = exploringParticles.particles[randInteger(exploringParticles.numberParticles)];
+				robotParticles->particles[k].weight = particleWeight;
 		}
 	}
+
 }
 
 
 void correctionResampling(RobotParticles *robotParticles, TagMap* tagMap,
-		TagDetectionSet* tagDetectionSet, double inertia) {
+		TagDetectionSet* tagDetectionSet, double inertia,int step) {
+	char outputFile[64];
 
 	double quality;
 
 	quality = weightRobotParticles(robotParticles, tagDetectionSet, tagMap);
 
+	sprintf(outputFile, "Robotweighted%d.m",step);
+	robotParticles->print(outputFile);
+
+
 	quality = round(quality * 10000) / 10000;
+
 
 	robotParticles->normalize();
 
-	if (quality == 1) {
+	sprintf(outputFile, "Robotnormalized%d.m",step);
+	robotParticles->print(outputFile);
 
+	if (quality == 1) {
+		printf("There is a bug.  Quality == 1");
 	} else if (quality > 1) {
 		printf("There is a bug.  Quality > 1");
 	} else {
+		printf("Robot Particles Quality == %lf\n",quality);
+		resampleExploreRobot(robotParticles, (inertia + (1 - inertia) * quality),tagMap, tagDetectionSet, true);
 
-		resampleExploreRobot(robotParticles, inertia + (1 - inertia) * quality,tagMap, tagDetectionSet, true);
-
-		robotParticles->estimatePosition();
 	}
 }
 
-void locateRobot(TagDetectionSet* tagDetectionSet, double odo_position[3],double old_odo[3], double odo_cov[3][3], TagMap* tagMap,RobotParticles *robotParticles, double inertia) {
+void locateRobot(TagDetectionSet* tagDetectionSet, double odo_position[3],double old_odo[3], double odo_cov[3][3], TagMap* tagMap,RobotParticles *robotParticles, double inertia,int step) {
+	char outputFile[64];
+
+	sprintf(outputFile, "RobotinitStep%d.m",step);
+	robotParticles->print(outputFile);
 
 	movementPrediction(odo_position, old_odo, odo_cov, robotParticles);
-	correctionResampling(robotParticles,tagMap,tagDetectionSet,inertia);
+
+	sprintf(outputFile, "Robotmovement%d.m",step);
+	robotParticles->print(outputFile);
+
+
+	correctionResampling(robotParticles,tagMap,tagDetectionSet,inertia,step);
+
+
+	sprintf(outputFile, "Robotresampled%d.m",step);
+	robotParticles->print(outputFile);
 
 }

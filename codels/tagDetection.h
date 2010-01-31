@@ -13,20 +13,23 @@
 #include <set>
 #include "TagParticles.h"
 
+using namespace std;
+
 class TagDetection {
 
 public:
 	int antenna;
-	char tagid[TAG_ID_MAX_SIZE + 1];
-	TagDetection(int antenna, char* tagid);
+	string tagid;
+	TagDetection(int antenna, string tagid);
 	TagDetection();
+	void print();
 	virtual ~TagDetection();
 };
 
 struct TagDetectionCompare {
 	bool operator()(const TagDetection* t1, const TagDetection* t2) const {
 		if (t1->antenna == t2->antenna) {
-			return strcmp(t1->tagid, t2->tagid) < 0;
+			return t1->tagid.compare(t2->tagid) < 0;
 		}else{
 			return (t1->antenna < t2->antenna);
 		}
@@ -35,11 +38,13 @@ struct TagDetectionCompare {
 
 typedef std::set< TagDetection*, TagDetectionCompare > TagDetectionSet;
 
+void printDetectionSet(TagDetectionSet *tagDetectionSet);
+
 void sortDetectionsByTagMap(TagDetectionSet* inside,TagDetectionSet* outside, TagDetectionSet* tagDetectionSet, TagMap *tagMap);
 
 void sortDetectionsByTagParticlesMap(TagDetectionSet* inside,TagDetectionSet* outside, TagDetectionSet* tagDetectionSet, TagParticlesMap *tagParticlesMap);
 
-void sortDetectionsByTagid(TagDetectionSet* inside, TagDetectionSet* tagDetectionSet, const char* tagid);
+void sortDetectionsByTagid(TagDetectionSet* inside, TagDetectionSet* tagDetectionSet, string tagid);
 
 void deleteTagDetections(TagDetectionSet* tagDetection);
 

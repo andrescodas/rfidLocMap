@@ -16,6 +16,7 @@ public:
 	virtual void accumulateWeights() = 0;
 	virtual double normalize() = 0;
 	virtual void resample() = 0;
+	virtual int print(const char* filename) = 0;
 };
 
 #endif /* PARTICLES_H_ */

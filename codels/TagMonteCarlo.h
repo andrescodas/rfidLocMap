@@ -16,10 +16,11 @@
 #include "tagDetection.h"
 
 
-double weightNormalizeTags(TagDetectionSet* tagDetectionSet,TagParticles* tagParticles,RobotParticles* robotParticles,const char* tagid);
+double weightNormalizeTags(TagDetectionSet* tagDetectionSet,TagParticles* tagParticles,RobotParticles* robotParticles,string tagid);
 
 
 void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetections,double inertia,RobotParticles *robotParticles,int numberParticlesTag,bool makeResample);
 
+void locateTags(TagParticlesMap *inferringTags,RobotParticles *robotParticles,TagDetectionSet *inferringTagsDetectionSet,double inertiaTag,int numberParticlesTag,int step);
 
 #endif /* TAGMONTECARLO_H_ */

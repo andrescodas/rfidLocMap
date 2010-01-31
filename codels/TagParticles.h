@@ -19,7 +19,6 @@ class TagParticles: public Particles {
 public:
 	std::map<Point2D, double,Point2DCmp> particles;
 	virtual ~TagParticles();
-	int numberParticles;
 	void clearWeights();
 	void accumulateWeights();
 	double normalize();
@@ -30,15 +29,16 @@ public:
 	void copy(TagParticles* tagParticles);
 	std::map<Point2D, double,Point2DCmp>::iterator searchParticle(double probability);
 	TagParticles();
-	TagParticles(int _numberParticles);
-	TagParticles(int _numberParticles, Particle _initialPosition);
+	TagParticles(Particle _initialPosition);
+	int print(const char *fileName);
+	void estimatePosition(double *x, double *y, double cov[3]);
 
 
 
 };
 
 //a map that allows us to recover a tag (position) by id
-typedef std::map<const char*, TagParticles*, strCmp> TagParticlesMap;
+typedef std::map<string, TagParticles*> TagParticlesMap;
 
 
 #endif /* TAGPARTICLES_H_ */

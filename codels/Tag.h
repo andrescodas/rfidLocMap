@@ -9,8 +9,10 @@
 #define TAG_H_
 
 #include <map>
-#include <string.h>
+#include <string>
 #include "Point2D.h"
+
+using namespace std;
 
 const int TAG_ID_MAX_SIZE = 16;
 
@@ -19,24 +21,22 @@ class Tag {
 public:
 	double x;
 	double y;
-	char tagid[TAG_ID_MAX_SIZE + 1];
-	Tag(double _x, double _y, const char* _tagid);
+	string tagId;
+	Tag(double _x, double _y, string _tagid);
 	Tag();
 	virtual ~Tag();
 };
 
-
+/*
 struct strCmp {
-	bool operator()(const char* s1, const char* s2) const {
-		return strcmp(s1, s2) < 0;
+	bool operator()( string s1, string s2) const {
+		return (s1.compare(s2) == 0);
 	}
 };
-
+*/
 
 //a map that allows us to recover a tag (position) by id
-typedef std::map<const char*, Point2D, strCmp> TagMap;
-
-TagMap initTagMap();
+typedef map<string , Point2D> TagMap;
 
 
 #endif /* TAG_H_ */

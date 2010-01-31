@@ -6,6 +6,7 @@
  */
 #include "MonteCarloMath.h"
 #include <stdlib.h>
+
 #include <math.h>
 
 //@tested
@@ -15,7 +16,12 @@ double mc_getRandomUniformDouble() {
 }
 
 int randInteger(int max){
-	return round((double(rand()*max)) / (((double) RAND_MAX)));
+	int num = (int)floor(double(((double(rand())) / (((double) RAND_MAX))) * double(max)) );
+	if(num == max){
+		num = max-1;
+	}
+	return num;
+
 }
 
 

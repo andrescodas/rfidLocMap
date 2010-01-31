@@ -27,12 +27,18 @@ typedef struct TAG_POSITION
 
 typedef struct TAG_POSITION_ERROR
 {
-	double tag_position_cov[4];
+	double tag_position_cov[3];
 } TAG_POSITION_ERROR;
+
+typedef struct TAG_ID
+{
+	char tagId[16];
+} TAG_ID;
 
 typedef struct TAG_POSITION_LIST
 {
 	int nbTags;
+	TAG_ID tagId_List[TAG_POSITION_LIST_MAX];
 	TAG_POSITION tag_positions[TAG_POSITION_LIST_MAX];
 	TAG_POSITION_ERROR tag_positions_error[TAG_POSITION_LIST_MAX];
 } TAG_POSITION_LIST;

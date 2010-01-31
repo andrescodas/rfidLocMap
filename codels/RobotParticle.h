@@ -15,6 +15,7 @@ public:
 	double theta;
 	RobotParticle();
 	RobotParticle(double _x,double _y,double _theta ,double _weight );
+	void print();
 	virtual ~RobotParticle();
 };
 

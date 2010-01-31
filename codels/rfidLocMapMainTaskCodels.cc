@@ -16,12 +16,16 @@
 #include "RobotMonteCarlo.h"
 #include "TagMonteCarlo.h"
 #include "../server/rfidLocMapHeader.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 
-
-const int numberParticlesRobot = 200;
-const int numberParticlesTag = 100;
-const double inertiaTag = 0.98;
+int numberParticlesRobot = 200;
+int numberParticlesTag = 1000;
+const double inertiaTag = 0.99;
 const double inertiaRobot = 0.95;
+int step = 0;
+
 
 RobotParticles robotParticles(numberParticlesRobot);
 double old_odo[3]; // x y t
@@ -38,7 +42,15 @@ TagParticlesMap inferringTags;
  */
 
 STATUS rfidLocMapInit(int *report) {
-	tagMap = initTagMap();
+
+	tagMap.clear();
+	tagMap["e0040000c1b2fd01\0"] = Point2D(-4.07, -1); //tag: 0
+	tagMap["e00400007cd7fc01\0"] = Point2D(-4.07, 1.84); //tag: 1
+	tagMap["e0040000079efd01\0"] = Point2D(3, 1.5); //tag: 2
+	tagMap["e004000076defc01\0"] = Point2D(00.50, 3.55); //tag: 3
+//	tagMap["e0040000dab1fd01\0"] = Point2D(01.50, +00.50); //tag: 4
+	tagMap["e0040000fa9afd01\0"] = Point2D(+02.50, -03.00); //tag: 5
+	tagMap["e004000080ddfc01\0"] = Point2D(-0.84, -03.27); //tag: 6
 
 	RobotParticle robotParticle(0,0,0,0);
 	robotParticles = RobotParticles(robotParticle,numberParticlesRobot);
@@ -52,7 +64,7 @@ STATUS rfidLocMapInit(int *report) {
 	SDI_F->position.theta = 0;
 	SDI_F->tagsPosition.nbTags = 0;
 
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 6; ++i) {
 		SDI_F->estimationError.position_cov[i] = 0;
 	}
 
@@ -75,19 +87,18 @@ STATUS rfidLocMapInit(int *report) {
  Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 
-	double quality;
+
 	double odo_position[3];
 	double odo_cov[3][3];
+
+	char outputFile[64];
+
+	int k;
 
 	TagDetectionSet tagDetectionSet;
 	TagDetectionSet fixedTagsDetectionSet;
 	TagDetectionSet inferringTagsDetectionSet;
-	TagDetectionSet knownInferringTagsDetection;
-	TagDetectionSet newInferringTagsDetection;
-	TagDetectionSet tagDetectionIt;
-	TagDetectionSet::iterator detectionIt;
 
-	TagParticles *newDetectedTag;
 
 	if (readRflex(odo_position, odo_cov) != 0) {
 		return ETHER;
@@ -96,47 +107,35 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 		return ETHER;
 	}
 
+	step++;
+
 	sortDetectionsByTagMap(&fixedTagsDetectionSet,&inferringTagsDetectionSet,&tagDetectionSet,&tagMap);
 
-	locateRobot(&fixedTagsDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,inertiaRobot);
+	locateRobot(&fixedTagsDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,inertiaRobot,step);
 
-	sortDetectionsByTagParticlesMap(&knownInferringTagsDetection,&newInferringTagsDetection,&inferringTagsDetectionSet,&inferringTags);
+	locateTags(&inferringTags,&robotParticles,&inferringTagsDetectionSet,inertiaTag,numberParticlesTag,step);
 
+	robotParticles.estimatePosition(&(SDI_F->position.xRob),&(SDI_F->position.yRob),&(SDI_F->position.theta),(SDI_F->estimationError.position_cov));
+
+	k = 0;
 	for(TagParticlesMap::iterator iTagIt = inferringTags.begin(); iTagIt != inferringTags.end();iTagIt++){
+		printf("currentTag = %s\n",iTagIt->first.c_str());
+		strcpy(SDI_F->tagsPosition.tagId_List[k].tagId,iTagIt->first.c_str());
+		(iTagIt->second)->estimatePosition(
+				&(SDI_F->tagsPosition.tag_positions[k].x),
+				&(SDI_F->tagsPosition.tag_positions[k].y),
+				SDI_F->tagsPosition.tag_positions_error[k].tag_position_cov);
 
-		tagDetectionIt.clear();
-		sortDetectionsByTagid(&tagDetectionIt,&knownInferringTagsDetection, iTagIt->first);
-		quality = weightNormalizeTags(&tagDetectionIt,(iTagIt->second),&robotParticles,iTagIt->first);
-
-		if(quality > 1){
-			printf("WeightNormalizeTags with quality > 1\n");
-		}
-
-		resampleExploreTags((iTagIt->second),&tagDetectionIt,inertiaTag+(1-inertiaTag)*quality,&robotParticles,numberParticlesTag,true);
-
+		printf("TagId = %s, x = %lf, y = %lf\n",SDI_F->tagsPosition.tagId_List[k].tagId,SDI_F->tagsPosition.tag_positions[k].x,SDI_F->tagsPosition.tag_positions[k].y);
+		k++;
 	}
-
-	detectionIt = newInferringTagsDetection.begin();
-	while(detectionIt != newInferringTagsDetection.end()){
-
-		tagDetectionIt.clear();
-		sortDetectionsByTagid(&tagDetectionIt,&newInferringTagsDetection, (*detectionIt)->tagid);
-
-		newDetectedTag = new TagParticles();
-
-		resampleExploreTags(newDetectedTag,&tagDetectionIt,0,&robotParticles,numberParticlesTag,false);
-
-		for(detectionIt = tagDetectionIt.begin();detectionIt != tagDetectionIt.end();detectionIt++){
-			newInferringTagsDetection.erase((*detectionIt));
-		}
-		detectionIt = newInferringTagsDetection.begin();
-	}
-
+	SDI_F->tagsPosition.nbTags = k;
 
 	old_odo[0] = odo_position[0];
 	old_odo[1] = odo_position[1];
 	old_odo[2] = odo_position[2];
 	deleteTagDetections(&tagDetectionSet);
+
 	return ETHER;
 }
 
@@ -159,7 +158,32 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsInter(int *report) {
  Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapStartRobotParticlesStart(POSITION *position,
 		int *report) {
-	/* ... add your code here ... */
+
+	RobotParticle robotParticle(position->xRob,position->yRob,position->theta,0);
+
+	robotParticles = RobotParticles(robotParticle,numberParticlesRobot);
+
+
+	if (initInput() != 0) {
+		printf("Problems in input initialization\n");
+	}
+
+	old_odo[0] = position->xRob;
+	old_odo[1] = position->yRob;
+	old_odo[2] = position->theta;
+
+	SDI_F->position.xRob = position->xRob;
+	SDI_F->position.yRob = position->yRob;
+	SDI_F->position.theta = position->theta;
+
+	/* Set new variances on (x,y,theta)
+	 With : v0 = vxx;  v1 = vxy;  v2 = vyy;  v3 = vxt; v4 = vyt;  v5 = vtt */
+	SDI_F->estimationError.position_cov[0] = 0;
+	SDI_F->estimationError.position_cov[1] = 0;
+	SDI_F->estimationError.position_cov[2] = 0;
+	SDI_F->estimationError.position_cov[3] = 0;
+	SDI_F->estimationError.position_cov[4] = 0;
+	SDI_F->estimationError.position_cov[5] = 0;
 	return ETHER;
 }
 
@@ -184,6 +208,8 @@ ACTIVITY_EVENT rfidLocMapStartRobotParticlesInter(POSITION *position,
 ACTIVITY_EVENT rfidLocMapSetNumberRobotParticlesStart(int *numberParticles,
 		int *report) {
 	/* ... add your code here ... */
+	numberParticlesRobot = *numberParticles;
+
 	return ETHER;
 }
 
@@ -207,7 +233,7 @@ ACTIVITY_EVENT rfidLocMapSetNumberRobotParticlesInter(int *numberParticles,
  Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapGetNumberRobotParticlesStart(int *numberParticles,
 		int *report) {
-	/* ... add your code here ... */
+	*numberParticles = numberParticlesRobot;
 	return ETHER;
 }
 

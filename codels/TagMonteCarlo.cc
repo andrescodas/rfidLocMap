@@ -26,6 +26,11 @@ double weightTagParticles(TagParticles* tagParticles,RobotParticle *robotParticl
 
 		p = probabilityModel(distance,angle) ;
 
+		//TODO: ANTENNA 5 OUT OF ORDER
+		if(antenna == 5){
+			p = 0.01;
+		}
+
 		if(!detected){
 			p = 1-p;
 		}
@@ -48,6 +53,12 @@ double weightTagExploringParticles(TagExploringParticles *exploringParticles,int
 	for(int particleIt = 0; particleIt < exploringParticles->numberParticles; particleIt++){
 		reduceToRobotSensorSystem(0,0,0,exploringParticles->particles[particleIt].x, exploringParticles->particles[particleIt].y,antenna,& distance, & angle);
 		p = probabilityModel(distance,angle) ;
+
+		//TODO: ANTENNA 5 OUT OF ORDER
+		if(antenna == 5){
+			p = 0.01;
+		}
+
 		if(!detected){
 			p = 1-p;
 		}
@@ -56,14 +67,14 @@ double weightTagExploringParticles(TagExploringParticles *exploringParticles,int
 }
 
 
-double weightNormalizeTags(TagDetectionSet* tagDetectionSet,TagParticles* tagParticles,RobotParticles* robotParticles,const char* tagid){
+double weightNormalizeTags(TagDetectionSet* tagDetectionSet,TagParticles* tagParticles,RobotParticles* robotParticles,string tagid){
 
 	TagParticles weightedTag;
 	TagParticles weightedTagAux;
 	TagDetection tagDetection;
 	TagDetectionSet::iterator tagDetectionIt;
 
-	strcpy(tagDetection.tagid,tagid);
+	tagDetection.tagid = tagid;
 
 	tagParticles->copy(&weightedTag);
 	weightedTag.clearWeights();
@@ -169,12 +180,14 @@ void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetectio
 	bool makeExploration = false;
 	bool exploringParticlesInited = false;
 	double particlesWeight = double(1.0)/double(numberParticlesTag);
-
-	std::map<Point2D, double,Point2DCmp>::iterator particleIt;
+	int k;
+	double inertiaRatio;
+	double oldparticles = 0;
+	double newparticles = 0;
 	std::map<Point2D, double,Point2DCmp>::iterator searchResult;
 
 	TagExploringParticles exploringParticles;
-	TagDetectionSet::iterator tagDetectionIt;
+
 
 	double position[2];
 	RobotParticle fromParticle;
@@ -194,19 +207,19 @@ void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetectio
 	}
 
 	if(makeExploration && makeResample){
-		for(particleIt = oldParticles.particles.begin();particleIt != oldParticles.particles.end();particleIt++){
+		for(k = 0;k < numberParticlesTag;k++){
 			if(mc_getRandomUniformDouble() < inertia){
 				searchResult = oldParticles.searchParticle(mc_getRandomUniformDouble());
 				tagParticles->insert(searchResult->first,particlesWeight);
-
+				newparticles = newparticles + 1;
 			}else{
 	            if(!exploringParticlesInited){
 	                exploringParticlesInited = true;
 	                newTagParticles(&exploringParticles,tagDetections,exploringParticles.numberParticles);
 	            }
-	            particle = exploringParticles.particles[randInteger(exploringParticles.numberParticles-1)];
+	            particle = exploringParticles.particles[randInteger(exploringParticles.numberParticles)];
 
-	            fromParticle = robotParticles->particles[randInteger(robotParticles->numberParticles-1)];
+	            fromParticle = robotParticles->particles[randInteger(robotParticles->numberParticles)];
 
 	            position[0] = particle.x;
 	            position[1] = particle.y;
@@ -214,13 +227,15 @@ void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetectio
 	            mc_rotation(position,fromParticle.theta);
 
 	            tagParticles->insert(Point2D(position[0]+fromParticle.x,position[1]+fromParticle.y),particlesWeight);
+	            oldparticles = oldparticles + 1;
 			}
 
 		}
-
+			inertiaRatio = newparticles/(newparticles+oldparticles);
+			printf("ratio comparison %lf == %lf\n",inertia,inertiaRatio);
 
 	}else if(makeResample){
-		for(particleIt = oldParticles.particles.begin();particleIt != oldParticles.particles.end();particleIt++){
+		for(k = 0;k < numberParticlesTag;k++){
 				searchResult = oldParticles.searchParticle(mc_getRandomUniformDouble());
 				tagParticles->insert(searchResult->first,particlesWeight);
 		}
@@ -230,10 +245,10 @@ void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetectio
 		exploringParticlesInited = true;
 		newTagParticles(&exploringParticles, tagDetections,exploringParticles.numberParticles);
 
-		for(particleIt = oldParticles.particles.begin(); particleIt!= oldParticles.particles.end(); particleIt++) {
-            particle = exploringParticles.particles[randInteger(exploringParticles.numberParticles-1)];
+		for(k = 0;k < numberParticlesTag;k++) {
+            particle = exploringParticles.particles[randInteger(exploringParticles.numberParticles)];
 
-            fromParticle = robotParticles->particles[randInteger(robotParticles->numberParticles-1)];
+            fromParticle = robotParticles->particles[randInteger(robotParticles->numberParticles)];
 
             position[0] = particle.x;
             position[1] = particle.y;
@@ -247,3 +262,78 @@ void resampleExploreTags(TagParticles *tagParticles,TagDetectionSet *tagDetectio
 	}
 }
 
+void locateTags(TagParticlesMap *inferringTags,RobotParticles *robotParticles,TagDetectionSet *inferringTagsDetectionSet,double inertiaTag,int numberParticlesTag,int step) {
+
+	TagDetectionSet knownInferringTagsDetection;
+	TagDetectionSet newInferringTagsDetection;
+	TagDetectionSet::iterator detectionIt;
+	TagDetectionSet tagDetectionIt;
+	TagParticles *newDetectedTag;
+	std::pair<string,TagParticles*> newTag;
+	double quality;
+	char outputFile[64];
+
+
+	sortDetectionsByTagParticlesMap(&knownInferringTagsDetection,
+			&newInferringTagsDetection, inferringTagsDetectionSet,
+			inferringTags);
+
+	for (TagParticlesMap::iterator iTagIt = inferringTags->begin(); iTagIt
+			!= inferringTags->end(); iTagIt++) {
+
+		tagDetectionIt.clear();
+		sortDetectionsByTagid(&tagDetectionIt, &knownInferringTagsDetection,
+				iTagIt->first);
+
+				sprintf(outputFile, "TaginitStep%d.m",step);
+				iTagIt->second->print(outputFile);
+
+		quality = weightNormalizeTags(&tagDetectionIt, (iTagIt->second),
+				robotParticles, iTagIt->first);
+
+				sprintf(outputFile, "Tagweighted%d.m",step);
+				iTagIt->second->print(outputFile);
+
+
+		if (quality > 1) {
+			printf("WeightNormalizeTags with quality > 1\n");
+		} else {
+			printf("  Tag Particles Quality == %lf\n", quality);
+		}
+
+		resampleExploreTags((iTagIt->second), &tagDetectionIt, inertiaTag + (1
+				- inertiaTag) * quality, robotParticles, numberParticlesTag,
+				true);
+
+				sprintf(outputFile, "Tagresampled%d.m",step);
+				iTagIt->second->print(outputFile);
+
+
+	}
+	printf("WeightTags\n");
+	detectionIt = newInferringTagsDetection.begin();
+	while (detectionIt != newInferringTagsDetection.end()) {
+
+		tagDetectionIt.clear();
+		sortDetectionsByTagid(&tagDetectionIt, &newInferringTagsDetection,
+				(*detectionIt)->tagid);
+
+		newDetectedTag = new TagParticles();
+
+		resampleExploreTags(newDetectedTag, &tagDetectionIt, 0,
+				robotParticles, numberParticlesTag, false);
+
+		newDetectedTag->print("Tagnewparticles.m");
+
+		newTag.first = (*detectionIt)->tagid;
+		newTag.second = newDetectedTag;
+		inferringTags->insert(newTag);
+
+		for (detectionIt = tagDetectionIt.begin(); detectionIt
+				!= tagDetectionIt.end(); detectionIt++) {
+			newInferringTagsDetection.erase((*detectionIt));
+		}
+		detectionIt = newInferringTagsDetection.begin();
+	}
+
+}

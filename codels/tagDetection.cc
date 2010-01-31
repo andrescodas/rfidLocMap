@@ -7,18 +7,25 @@
 
 #include "tagDetection.h"
 #include <string>
+#include "stdio.h"
+#include "stdlib.h"
+
 
 TagDetection::TagDetection() {
 
 }
 
 
-TagDetection::TagDetection(int a, char* t) {
+TagDetection::TagDetection(int a, string t) {
 	this->antenna = a;
-	strcpy(this->tagid , t );
+	this->tagid = t;
 
 }
 
+
+void TagDetection::print(){
+	printf("TagDetection: %s\t%d\n",this->tagid.c_str(),this->antenna);
+}
 
 TagDetection::~TagDetection() {
 
@@ -65,13 +72,24 @@ void sortDetectionsByTagParticlesMap(TagDetectionSet* inside,TagDetectionSet* ou
 }
 
 
-void sortDetectionsByTagid(TagDetectionSet* inside, TagDetectionSet* tagDetectionSet, const char* tagid){
+void sortDetectionsByTagid(TagDetectionSet* inside, TagDetectionSet* tagDetectionSet, string tagid){
 	TagDetectionSet::iterator tagDetectionIt ;
 
 	for(tagDetectionIt = tagDetectionSet->begin();tagDetectionIt != tagDetectionSet->end();tagDetectionIt++){
 
-		if(strcmp((*tagDetectionIt)->tagid,tagid) == 0){
+		if((*tagDetectionIt)->tagid.compare(tagid) == 0){
 			inside->insert(*tagDetectionIt);
 		}
+	}
+}
+
+void printDetectionSet(TagDetectionSet *tagDetectionSet){
+
+	TagDetectionSet::iterator detectionIt;
+	detectionIt = tagDetectionSet->begin();
+
+	while(detectionIt != tagDetectionSet->end()){
+		(*detectionIt)->print();
+		detectionIt++;
 	}
 }
