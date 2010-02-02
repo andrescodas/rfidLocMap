@@ -41,6 +41,8 @@ typedef struct RFIDLOCMAP_STR {
          POSITION_ERROR         estimationError;
          TAG_POSITION_LIST tagsPosition;
          int			numberParticles;
+         int			padding;
+         double			inertia;
 } RFIDLOCMAP_STR;
 
 /*------------------------------------------------------------
@@ -71,10 +73,28 @@ request StartRobotParticles {
     interrupt_activity:	    all; 
 };
 
+request StartOdometry {
+    doc:		    "Set odometry initial Point";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    input:		    newPosition::position; 
+    codel_start:	    rfidLocMapStartOdometryStart;
+    codel_inter:	    rfidLocMapStartOdometryInter;
+    interrupt_activity:	    all; 
+};
+
+request StartInput {
+    doc:		    "Restart Inputs";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    codel_start:	    rfidLocMapStartInputStart;
+    codel_inter:	    rfidLocMapStartInputInter;
+    interrupt_activity:	    all; 
+};
 
 /*  */
 request SetNumberRobotParticles {
-    doc:		    "Define number of robot particles";
+    doc:		    "Define number of robot particles  Warning!!!... Resets the covariance to 0!!!";
     type:		    exec;
     exec_task:		    MainTask; 
     input:		    newNumberParticles::numberParticles; 
@@ -95,7 +115,74 @@ request GetNumberRobotParticles {
     interrupt_activity:	    all; 
 };
 
+/*  */
+request SetNumberTagParticles {
+    doc:		    "Define number of tag particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    input:		    newNumberParticles::numberParticles; 
+    codel_start:	    rfidLocMapSetNumberTagParticlesStart;
+    codel_inter:	    rfidLocMapSetNumberTagParticlesInter; 
+    interrupt_activity:	    all; 
+};
 
+
+/*  */
+request GetNumberTagParticles {
+    doc:		    "Get number of tag particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    output:		    outNumberParticles::numberParticles;
+    codel_start:	    rfidLocMapGetNumberTagParticlesStart;
+    codel_inter:	    rfidLocMapGetNumberTagParticlesInter; 
+    interrupt_activity:	    all; 
+};
+
+/*  */
+request SetRobotInertia {
+    doc:		    "Define the inertia of the robot particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    input:		    newInertia::inertia; 
+    codel_start:	    rfidLocMapSetRobotInertiaStart;
+    codel_inter:	    rfidLocMapSetRobotInertiaInter; 
+    interrupt_activity:	    all; 
+};
+
+
+/*  */
+request GetRobotInertia {
+    doc:		    "Get the inertia of the robot particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    output:		    outInertia::inertia;
+    codel_start:	    rfidLocMapGetRobotInertiaStart;
+    codel_inter:	    rfidLocMapGetRobotInertiaInter; 
+    interrupt_activity:	    all; 
+};
+
+/*  */
+request SetTagInertia {
+    doc:		    "Define the inertia of the tag particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    input:		    newInertia::inertia; 
+    codel_start:	    rfidLocMapSetTagInertiaStart;
+    codel_inter:	    rfidLocMapSetTagInertiaInter; 
+    interrupt_activity:	    all; 
+};
+
+
+/*  */
+request GetTagInertia {
+    doc:		    "Get the inertia of the tag particles";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    output:		    outInertia::inertia;
+    codel_start:	    rfidLocMapGetTagInertiaStart;
+    codel_inter:	    rfidLocMapGetTagInertiaInter; 
+    interrupt_activity:	    all; 
+};
 
 
 /*------------------------------------------------------------
