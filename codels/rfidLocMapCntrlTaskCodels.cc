@@ -3,8 +3,8 @@
  **
  ** Codels used by the control task rfidLocMapCntrlTask
  **
- ** Author:
- ** Date:
+ ** Author: 
+ ** Date: 
  **
  **/
 

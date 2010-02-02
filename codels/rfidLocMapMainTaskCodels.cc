@@ -22,8 +22,8 @@
 
 int numberParticlesRobot = 200;
 int numberParticlesTag = 1000;
-const double inertiaTag = 0.99;
-const double inertiaRobot = 0.95;
+double inertiaTag = 0.99;
+double inertiaRobot = 0.95;
 int step = 0;
 
 
@@ -69,8 +69,8 @@ STATUS rfidLocMapInit(int *report) {
 	}
 
 	initSensorModel();
-
-	return OK;
+  /* ... add your code here ... */
+  return OK;
 }
 
 /*------------------------------------------------------------------------
@@ -84,7 +84,7 @@ STATUS rfidLocMapInit(int *report) {
  */
 
 /* rfidLocMapActualizePositionsStart  -  codel START of ActualizePositions
- Returns:  START EXEC END ETHER FAIL ZOMBIE */
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 
 
@@ -120,13 +120,13 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 	k = 0;
 	for(TagParticlesMap::iterator iTagIt = inferringTags.begin(); iTagIt != inferringTags.end();iTagIt++){
 		printf("currentTag = %s\n",iTagIt->first.c_str());
-		strcpy(SDI_F->tagsPosition.tagId_List[k].tagId,iTagIt->first.c_str());
+		strcpy(SDI_F->tagsPosition.tags[k].tagId.tagId,iTagIt->first.c_str());
 		(iTagIt->second)->estimatePosition(
-				&(SDI_F->tagsPosition.tag_positions[k].x),
-				&(SDI_F->tagsPosition.tag_positions[k].y),
-				SDI_F->tagsPosition.tag_positions_error[k].tag_position_cov);
+				&(SDI_F->tagsPosition.tags[k].tag_position.x),
+				&(SDI_F->tagsPosition.tags[k].tag_position.y),
+				SDI_F->tagsPosition.tags[k].tag_position_error.tag_position_cov);
 
-		printf("TagId = %s, x = %lf, y = %lf\n",SDI_F->tagsPosition.tagId_List[k].tagId,SDI_F->tagsPosition.tag_positions[k].x,SDI_F->tagsPosition.tag_positions[k].y);
+		printf("TagId = %s, x = %lf, y = %lf\n",SDI_F->tagsPosition.tags[k].tagId.tagId,SDI_F->tagsPosition.tags[k].tag_position.x,SDI_F->tagsPosition.tags[k].tag_position.y);
 		k++;
 	}
 	SDI_F->tagsPosition.nbTags = k;
@@ -135,15 +135,15 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 	old_odo[1] = odo_position[1];
 	old_odo[2] = odo_position[2];
 	deleteTagDetections(&tagDetectionSet);
-
-	return ETHER;
+  /* ... add your code here ... */
+  return ETHER;
 }
 
 /* rfidLocMapActualizePositionsInter  -  codel INTER of ActualizePositions
- Returns:  INTER ETHER FAIL ZOMBIE */
+   Returns:  INTER ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapActualizePositionsInter(int *report) {
 	printf("rfidLocMapActualizePositionsInter \n");
-	return ETHER;
+  return ETHER;
 }
 
 /*------------------------------------------------------------------------
@@ -155,22 +155,13 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsInter(int *report) {
  */
 
 /* rfidLocMapStartRobotParticlesStart  -  codel START of StartRobotParticles
- Returns:  START EXEC END ETHER FAIL ZOMBIE */
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapStartRobotParticlesStart(POSITION *position,
 		int *report) {
-
+  /* ... add your code here ... */
 	RobotParticle robotParticle(position->xRob,position->yRob,position->theta,0);
 
 	robotParticles = RobotParticles(robotParticle,numberParticlesRobot);
-
-
-	if (initInput() != 0) {
-		printf("Problems in input initialization\n");
-	}
-
-	old_odo[0] = position->xRob;
-	old_odo[1] = position->yRob;
-	old_odo[2] = position->theta;
 
 	SDI_F->position.xRob = position->xRob;
 	SDI_F->position.yRob = position->yRob;
@@ -184,15 +175,77 @@ ACTIVITY_EVENT rfidLocMapStartRobotParticlesStart(POSITION *position,
 	SDI_F->estimationError.position_cov[3] = 0;
 	SDI_F->estimationError.position_cov[4] = 0;
 	SDI_F->estimationError.position_cov[5] = 0;
-	return ETHER;
+  return ETHER;
 }
 
 /* rfidLocMapStartRobotParticlesInter  -  codel INTER of StartRobotParticles
- Returns:  INTER ETHER FAIL ZOMBIE */
+   Returns:  INTER ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapStartRobotParticlesInter(POSITION *position,
 		int *report) {
-	printf("rfidLocMapStartRobotParticlesInter");
-	return ETHER;
+  printf("rfidLocMapStartRobotParticlesInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * StartOdometry
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapStartOdometryStart  -  codel START of StartOdometry
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapStartOdometryStart(POSITION *position, int *report)
+{
+  /* ... add your code here ... */
+	old_odo[0] = position->xRob;
+	old_odo[1] = position->yRob;
+	old_odo[2] = position->theta;
+  return ETHER;
+}
+
+/* rfidLocMapStartOdometryInter  -  codel INTER of StartOdometry
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapStartOdometryInter(POSITION *position, int *report)
+{
+  /* ... add your code here ... */
+	printf("rfidLocMapStartOdometryInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * StartInput
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapStartInputStart  -  codel START of StartInput
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapStartInputStart(int *report)
+{
+  /* ... add your code here ... */
+
+	if (initInput() != 0) {
+		printf("Problems in input initialization\n");
+	}
+
+  return ETHER;
+}
+
+/* rfidLocMapStartInputInter  -  codel INTER of StartInput
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapStartInputInter(int *report)
+{
+  /* ... add your code here ... */
+	printf("rfidLocMapStartInputInter\n");
+  return ETHER;
 }
 
 /*------------------------------------------------------------------------
@@ -204,21 +257,25 @@ ACTIVITY_EVENT rfidLocMapStartRobotParticlesInter(POSITION *position,
  */
 
 /* rfidLocMapSetNumberRobotParticlesStart  -  codel START of SetNumberRobotParticles
- Returns:  START EXEC END ETHER FAIL ZOMBIE */
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapSetNumberRobotParticlesStart(int *numberParticles,
 		int *report) {
-	/* ... add your code here ... */
+
+
 	numberParticlesRobot = *numberParticles;
 
-	return ETHER;
+	rfidLocMapStartRobotParticlesStart(&(SDI_F->position),report);
+
+  /* ... add your code here ... */
+  return ETHER;
 }
 
 /* rfidLocMapSetNumberRobotParticlesInter  -  codel INTER of SetNumberRobotParticles
- Returns:  INTER ETHER FAIL ZOMBIE */
+   Returns:  INTER ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapSetNumberRobotParticlesInter(int *numberParticles,
 		int *report) {
-	printf("rfidLocMapSetNumberRobotParticlesInter");
-	return ETHER;
+	printf("rfidLocMapSetNumberRobotParticlesInter\n");
+  return ETHER;
 }
 
 /*------------------------------------------------------------------------
@@ -230,18 +287,175 @@ ACTIVITY_EVENT rfidLocMapSetNumberRobotParticlesInter(int *numberParticles,
  */
 
 /* rfidLocMapGetNumberRobotParticlesStart  -  codel START of GetNumberRobotParticles
- Returns:  START EXEC END ETHER FAIL ZOMBIE */
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapGetNumberRobotParticlesStart(int *numberParticles,
 		int *report) {
 	*numberParticles = numberParticlesRobot;
-	return ETHER;
+  return ETHER;
 }
 
 /* rfidLocMapGetNumberRobotParticlesInter  -  codel INTER of GetNumberRobotParticles
- Returns:  INTER ETHER FAIL ZOMBIE */
+   Returns:  INTER ETHER FAIL ZOMBIE */
 ACTIVITY_EVENT rfidLocMapGetNumberRobotParticlesInter(int *numberParticles,
 		int *report) {
-	printf("rfidLocMapGetNumberRobotParticlesInter");
-	return ETHER;
+  	printf("rfidLocMapGetNumberRobotParticlesInter\n");
+  return ETHER;
 }
+
+/*------------------------------------------------------------------------
+ * SetNumberTagParticles
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapSetNumberTagParticlesStart  -  codel START of SetNumberTagParticles
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapSetNumberTagParticlesStart(int *numberParticles, int *report)
+{
+  numberParticlesTag = *numberParticles;
+  return ETHER;
+}
+
+/* rfidLocMapSetNumberTagParticlesInter  -  codel INTER of SetNumberTagParticles
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapSetNumberTagParticlesInter(int *numberParticles, int *report)
+{
+  printf("rfidLocMapSetNumberTagParticlesInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * GetNumberTagParticles
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapGetNumberTagParticlesStart  -  codel START of GetNumberTagParticles
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapGetNumberTagParticlesStart(int *numberParticles, int *report)
+{
+	*numberParticles = numberParticlesTag;
+  return ETHER;
+}
+
+/* rfidLocMapGetNumberTagParticlesInter  -  codel INTER of GetNumberTagParticles
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapGetNumberTagParticlesInter(int *numberParticles, int *report)
+{
+  printf("rfidLocMapGetNumberTagParticlesInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * SetRobotInertia
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapSetRobotInertiaStart  -  codel START of SetRobotInertia
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapSetRobotInertiaStart(double *inertia, int *report)
+{
+  inertiaRobot = *inertia;
+  return ETHER;
+}
+
+/* rfidLocMapSetRobotInertiaInter  -  codel INTER of SetRobotInertia
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapSetRobotInertiaInter(double *inertia, int *report)
+{
+  printf("rfidLocMapSetRobotInertiaInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * GetRobotInertia
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapGetRobotInertiaStart  -  codel START of GetRobotInertia
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapGetRobotInertiaStart(double *inertia, int *report)
+{
+  *inertia = inertiaRobot;
+  return ETHER;
+}
+
+/* rfidLocMapGetRobotInertiaInter  -  codel INTER of GetRobotInertia
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapGetRobotInertiaInter(double *inertia, int *report)
+{
+  printf("rfidLocMapGetRobotInertiaInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * SetTagInertia
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapSetTagInertiaStart  -  codel START of SetTagInertia
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapSetTagInertiaStart(double *inertia, int *report)
+{
+  inertiaTag = *inertia;
+  return ETHER;
+}
+
+/* rfidLocMapSetTagInertiaInter  -  codel INTER of SetTagInertia
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapSetTagInertiaInter(double *inertia, int *report)
+{
+  printf("rfidLocMapSetTagInertiaInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * GetTagInertia
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapGetTagInertiaStart  -  codel START of GetTagInertia
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapGetTagInertiaStart(double *inertia, int *report)
+{
+  *inertia = inertiaTag;
+  return ETHER;
+}
+
+/* rfidLocMapGetTagInertiaInter  -  codel INTER of GetTagInertia
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapGetTagInertiaInter(double *inertia, int *report)
+{
+  printf("rfidLocMapGetTagInertiaStart\n");
+  return ETHER;
+}
+
 

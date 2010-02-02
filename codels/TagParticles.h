@@ -33,10 +33,7 @@ public:
 	int print(const char *fileName);
 	void estimatePosition(double *x, double *y, double cov[3]);
 
-
-
 };
-
 //a map that allows us to recover a tag (position) by id
 typedef std::map<string, TagParticles*> TagParticlesMap;
 
