@@ -30,14 +30,9 @@ typedef struct TAG_POSITION_ERROR
 	double tag_position_cov[3];
 } TAG_POSITION_ERROR;
 
-typedef struct TAG_ID
-{
-	char tagId[16];
-} TAG_ID;
-
 typedef struct TAG
 {
-  TAG_ID tagId;
+  char tagId[17];
   TAG_POSITION tag_position;
   TAG_POSITION_ERROR tag_position_error;
 } TAG;

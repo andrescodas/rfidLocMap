@@ -310,7 +310,7 @@ void locateTags(TagParticlesMap *inferringTags,RobotParticles *robotParticles,Ta
 
 
 	}
-	printf("WeightTags\n");
+
 	detectionIt = newInferringTagsDetection.begin();
 	while (detectionIt != newInferringTagsDetection.end()) {
 

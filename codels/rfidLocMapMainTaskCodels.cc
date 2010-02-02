@@ -120,13 +120,13 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 	k = 0;
 	for(TagParticlesMap::iterator iTagIt = inferringTags.begin(); iTagIt != inferringTags.end();iTagIt++){
 		printf("currentTag = %s\n",iTagIt->first.c_str());
-		strcpy(SDI_F->tagsPosition.tags[k].tagId.tagId,iTagIt->first.c_str());
+		strcpy(SDI_F->tagsPosition.tags[k].tagId,iTagIt->first.c_str());
 		(iTagIt->second)->estimatePosition(
 				&(SDI_F->tagsPosition.tags[k].tag_position.x),
 				&(SDI_F->tagsPosition.tags[k].tag_position.y),
 				SDI_F->tagsPosition.tags[k].tag_position_error.tag_position_cov);
 
-		printf("TagId = %s, x = %lf, y = %lf\n",SDI_F->tagsPosition.tags[k].tagId.tagId,SDI_F->tagsPosition.tags[k].tag_position.x,SDI_F->tagsPosition.tags[k].tag_position.y);
+		printf("TagId = %s, x = %lf, y = %lf\n",SDI_F->tagsPosition.tags[k].tagId,SDI_F->tagsPosition.tags[k].tag_position.x,SDI_F->tagsPosition.tags[k].tag_position.y);
 		k++;
 	}
 	SDI_F->tagsPosition.nbTags = k;
