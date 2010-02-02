@@ -35,12 +35,18 @@ typedef struct TAG_ID
 	char tagId[16];
 } TAG_ID;
 
+typedef struct TAG
+{
+  TAG_ID tagId;
+  TAG_POSITION tag_position;
+  TAG_POSITION_ERROR tag_position_error;
+} TAG;
+
+
 typedef struct TAG_POSITION_LIST
 {
 	int nbTags;
-	TAG_ID tagId_List[TAG_POSITION_LIST_MAX];
-	TAG_POSITION tag_positions[TAG_POSITION_LIST_MAX];
-	TAG_POSITION_ERROR tag_positions_error[TAG_POSITION_LIST_MAX];
+	TAG tags[TAG_POSITION_LIST_MAX];
 } TAG_POSITION_LIST;
 
 
