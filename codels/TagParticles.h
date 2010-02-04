@@ -12,8 +12,6 @@
 #include "Tag.h"
 #include <map>
 
-const int MAX_TAG_PARTICLES = 500;
-
 
 class TagParticles: public Particles {
 public:

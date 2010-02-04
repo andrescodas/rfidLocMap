@@ -92,6 +92,16 @@ request StartInput {
     interrupt_activity:	    all; 
 };
 
+request ClearTags {
+    doc:		    "Clear Tags";
+    type:		    exec;
+    exec_task:		    MainTask; 
+    codel_start:	    rfidLocMapClearTagsStart;
+    codel_inter:	    rfidLocMapClearTagsInter;
+    interrupt_activity:	    all; 
+};
+
+
 /*  */
 request SetNumberRobotParticles {
     doc:		    "Define number of robot particles  Warning!!!... Resets the covariance to 0!!!";

@@ -251,8 +251,8 @@ void correctionResampling(RobotParticles *robotParticles, TagMap* tagMap,
 
 	quality = weightRobotParticles(robotParticles, tagDetectionSet, tagMap);
 
-	sprintf(outputFile, "Robotweighted%d.m",step);
-	robotParticles->print(outputFile);
+//	sprintf(outputFile, "Robotweighted%d.m",step);
+//	robotParticles->print(outputFile);
 
 
 	quality = round(quality * 10000) / 10000;
@@ -260,8 +260,8 @@ void correctionResampling(RobotParticles *robotParticles, TagMap* tagMap,
 
 	robotParticles->normalize();
 
-	sprintf(outputFile, "Robotnormalized%d.m",step);
-	robotParticles->print(outputFile);
+//	sprintf(outputFile, "Robotnormalized%d.m",step);
+//	robotParticles->print(outputFile);
 
 	if (quality == 1) {
 		printf("There is a bug.  Quality == 1");
@@ -277,19 +277,19 @@ void correctionResampling(RobotParticles *robotParticles, TagMap* tagMap,
 void locateRobot(TagDetectionSet* tagDetectionSet, double odo_position[3],double old_odo[3], double odo_cov[3][3], TagMap* tagMap,RobotParticles *robotParticles, double inertia,int step) {
 	char outputFile[64];
 
-	sprintf(outputFile, "RobotinitStep%d.m",step);
-	robotParticles->print(outputFile);
+//	sprintf(outputFile, "RobotinitStep%d.m",step);
+//	robotParticles->print(outputFile);
 
 	movementPrediction(odo_position, old_odo, odo_cov, robotParticles);
 
-	sprintf(outputFile, "Robotmovement%d.m",step);
-	robotParticles->print(outputFile);
+//	sprintf(outputFile, "Robotmovement%d.m",step);
+//	robotParticles->print(outputFile);
 
 
 	correctionResampling(robotParticles,tagMap,tagDetectionSet,inertia,step);
 
 
-	sprintf(outputFile, "Robotresampled%d.m",step);
-	robotParticles->print(outputFile);
+//	sprintf(outputFile, "Robotresampled%d.m",step);
+//	robotParticles->print(outputFile);
 
 }

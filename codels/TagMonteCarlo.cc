@@ -285,14 +285,14 @@ void locateTags(TagParticlesMap *inferringTags,RobotParticles *robotParticles,Ta
 		sortDetectionsByTagid(&tagDetectionIt, &knownInferringTagsDetection,
 				iTagIt->first);
 
-				sprintf(outputFile, "TaginitStep%d.m",step);
-				iTagIt->second->print(outputFile);
+//				sprintf(outputFile, "TaginitStep%d.m",step);
+//				iTagIt->second->print(outputFile);
 
 		quality = weightNormalizeTags(&tagDetectionIt, (iTagIt->second),
 				robotParticles, iTagIt->first);
 
-				sprintf(outputFile, "Tagweighted%d.m",step);
-				iTagIt->second->print(outputFile);
+//				sprintf(outputFile, "Tagweighted%d.m",step);
+//				iTagIt->second->print(outputFile);
 
 
 		if (quality > 1) {
@@ -301,12 +301,12 @@ void locateTags(TagParticlesMap *inferringTags,RobotParticles *robotParticles,Ta
 			printf("  Tag Particles Quality == %lf\n", quality);
 		}
 
-		resampleExploreTags((iTagIt->second), &tagDetectionIt, inertiaTag + (1
+		resampleExploreTags((iTagIt->second), &tagDetectionIt, inertiaTag + (0.95
 				- inertiaTag) * quality, robotParticles, numberParticlesTag,
 				true);
 
-				sprintf(outputFile, "Tagresampled%d.m",step);
-				iTagIt->second->print(outputFile);
+//				sprintf(outputFile, "Tagresampled%d.m",step);
+//				iTagIt->second->print(outputFile);
 
 
 	}

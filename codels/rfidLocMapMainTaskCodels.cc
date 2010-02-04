@@ -20,9 +20,9 @@
 #include "stdlib.h"
 #include "string.h"
 
-int numberParticlesRobot = 200;
+int numberParticlesRobot = 500;
 int numberParticlesTag = 1000;
-double inertiaTag = 0.99;
+double inertiaTag = 0.9;
 double inertiaRobot = 0.95;
 int step = 0;
 
@@ -111,7 +111,13 @@ ACTIVITY_EVENT rfidLocMapActualizePositionsStart(int *report) {
 
 	sortDetectionsByTagMap(&fixedTagsDetectionSet,&inferringTagsDetectionSet,&tagDetectionSet,&tagMap);
 
-	locateRobot(&fixedTagsDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,inertiaRobot,step);
+//	locateRobot(&fixedTagsDetectionSet,odo_position,old_odo,odo_cov,&tagMap,&robotParticles,inertiaRobot,step);
+
+//	For Robot with Exact Position estimation --> also change file to read to mocapPositionSet
+	RobotParticle robotParticle(odo_position[0],odo_position[1],odo_position[2],0);
+	robotParticles = RobotParticles(robotParticle,1);
+
+
 
 	locateTags(&inferringTags,&robotParticles,&inferringTagsDetectionSet,inertiaTag,numberParticlesTag,step);
 
@@ -245,6 +251,49 @@ rfidLocMapStartInputInter(int *report)
 {
   /* ... add your code here ... */
 	printf("rfidLocMapStartInputInter\n");
+  return ETHER;
+}
+
+/*------------------------------------------------------------------------
+ * ClearTags
+ *
+ * Description:
+ *
+ * Reports:      OK
+ */
+
+/* rfidLocMapClearTagsStart  -  codel START of ClearTags
+   Returns:  START EXEC END ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapClearTagsStart(int *report)
+{
+  /* ... add your code here ... */
+	for(TagParticlesMap::iterator iTagIt = inferringTags.begin(); iTagIt != inferringTags.end();iTagIt++){
+		delete(iTagIt->second);
+	}
+	SDI_F->tagsPosition.nbTags = 0;	inferringTags.clear();
+
+/*
+	TagParticles *newDetectedTag;
+	std::pair<string,TagParticles*> newTag;
+	newDetectedTag = new TagParticles();
+	newDetectedTag->particles.clear();
+	newDetectedTag->insert(Point2D(1.5, 0.5),1);
+	newTag.first = "e0040000dab1fd01\0";
+	newTag.second = newDetectedTag;
+	inferringTags.insert(newTag);
+*/
+
+  return ETHER;
+}
+
+/* rfidLocMapClearTagsInter  -  codel INTER of ClearTags
+   Returns:  INTER ETHER FAIL ZOMBIE */
+ACTIVITY_EVENT
+rfidLocMapClearTagsInter(int *report)
+{
+  /* ... add your code here ... */
+	printf("rfidLocMapClearTagsInter\n");
   return ETHER;
 }
 
